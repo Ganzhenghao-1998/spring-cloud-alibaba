@@ -2,14 +2,14 @@ package com.ganzhenghao.sentinel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableAsync
-public class SentinelApplication {
+@EnableFeignClients
+public class SentinelFeignClientApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SentinelApplication.class, args);
+        SpringApplication.run(SentinelFeignClientApplication.class, args);
     }
 
 }

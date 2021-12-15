@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/nacos/nacos.iml" filepath="$PROJECT_DIR$/nacos/nacos.iml" />
       <module fileurl="file://$PROJECT_DIR$/sentinel/sentinel.iml" filepath="$PROJECT_DIR$/sentinel/sentinel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sentinel-feign-client/sentinel-feign-client.iml" filepath="$PROJECT_DIR$/sentinel-feign-client/sentinel-feign-client.iml" />
     </modules>
   </component>
 </project>

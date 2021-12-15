@@ -35,7 +35,4 @@ public class NacosConfigController {
     public String getName(){
         return "a";
     }
-
-
-
 }

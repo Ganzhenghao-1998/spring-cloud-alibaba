@@ -1,17 +1,19 @@
 package com.ganzhenghao.sentinel.controller;
 
+import com.alibaba.csp.sentinel.AsyncEntry;
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphO;
 import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
+import com.ganzhenghao.sentinel.service.AnnotationReturnService;
+import com.ganzhenghao.sentinel.service.AsyncService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 哨兵控制器
@@ -22,43 +24,93 @@ import java.util.List;
  */
 @RequestMapping("/sentinel")
 @RestController
+@Slf4j
 public class SentinelController {
 
 
+    @Autowired
+    private AsyncService asyncService;
+    @Autowired
+    private AnnotationReturnService annotationReturnService;
+
     /**
-     * 限流规则 - QPS
+     * 抛出异常的方式 定义资源 SphU
      *
      * @return {@link Object}
      */
-    @GetMapping("/qps")
-    public Object sentinel_qps() {
-        try{
-           SphU.entry("Hello");
-            return "Hello Sentinel !";
+    @GetMapping("/ex")
+    public String sentinel_exception() {
+        try (Entry entry = SphU.entry("exception")) {
+            return "Hello Sentinel!";
         } catch (BlockException e) {
-            return "Blocked";
+            return "Blocked By Exception";
         }
-
     }
 
     /**
-     * Sentinel限流规则创建
+     * 布尔方式定义资源 使用的 SphO
+     *
+     * @return {@link Object}
      */
-    @PostConstruct
-    public void initFlowRule() {
-        // 1. 创建存放限流规则的集合
-        List<FlowRule> rules = new ArrayList<>();
-        // 2. 创建限流规则
-        FlowRule rule = new FlowRule();
-        // 2.1 定义资源, 表示Sentinel会对哪个资源生效
-        rule.setResource("Hello");
-        // 2.2 定义限流规则类型  RuleConstant.FLOW_GRADE_QPS : QPS限流类型
-        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);
-        rule.setCount(2);//代表QPS每秒通过的请求个数
-        // 3. 存入集合
-        rules.add(rule);
-        // 4. 加载先流规则
-        FlowRuleManager.loadRules(rules);
+    @GetMapping("/bool")
+    public String sentinel_boolean() {
+        // 资源名可使用任意有业务语义的字符串
+        if (SphO.entry("boolean")) {
+            // 务必保证finally会被执行
+            try {
+                /*
+                  被保护的业务逻辑
+                 */
+                return "Hello Sentinel!";
+            } finally {
+                SphO.exit();
+            }
+        } else {
+            // 资源访问阻止，被限流或被降级
+            // 进行相应的处理操作
+            return "Blocked By Boolean!";
+        }
+    }
+
+    // 原本的业务方法.
+    @SentinelResource(
+            value = "annotation",
+            blockHandler = "sentinel_annotation_blockHandler",
+            fallback = "sentinel_annotation_fallback"
+    )
+    @GetMapping("/anno/{id}")
+    public String sentinel_annotation(@PathVariable String id) {
+
+        return annotationReturnService.isThrowException(id);
+    }
+
+
+    // blockHandler 函数，原方法调用被限流/降级/系统保护的时候调用
+    public String sentinel_annotation_blockHandler(@PathVariable String id,BlockException ex) {
+        log.error("sentinel_annotation_blockHandler!");
+        return "Blocked By Annotation!";
+    }
+
+    // blockHandler 函数，原方法调用被限流/降级/系统保护的时候调用
+    public String sentinel_annotation_fallback(@PathVariable String id,BlockException ex) {
+        log.error("sentinel_annotation_fallback!");
+        return "Blocked By Annotation!";
+    }
+
+
+    @GetMapping("/async")
+    public String sentinel_async() {
+        try {
+            AsyncEntry entry = SphU.asyncEntry("async");
+            // 异步调用.
+            asyncService.async(entry);
+            return "Hello Sentinel!";
+        } catch (BlockException ex) {
+            // Request blocked.
+            // Handle the exception (e.g. retry or fallback).
+            return "Blocked By Async!";
+        }
+
     }
 
 

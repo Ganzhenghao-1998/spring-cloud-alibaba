@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ganzhenghao.sentinel.nacosconfig;
+package com.ganzhenghao.sentinel.config;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author <a href="mailto:chenxilzx1@gmail.com">theonefx</a>
  */
-@EnableAutoConfiguration
+@EnableDiscoveryClient
 @Configuration
-public class NacosConfigConfiguration {
+public class NacosDiscoveryConfiguration {
 }

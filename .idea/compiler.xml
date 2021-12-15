@@ -8,12 +8,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="sentinel" />
+        <module name="sentinel-feign-client" />
         <module name="nacos" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="nacos" target="1.8" />
       <module name="sentinel" target="1.8" />
+      <module name="sentinel-feign-client" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
